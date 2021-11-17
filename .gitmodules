@@ -1,0 +1,3 @@
+[submodule "simplex"]
+	path = simplexlib
+	url = git@github.com:mocurin/dt-lab-01.git
