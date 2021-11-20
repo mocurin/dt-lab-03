@@ -1,6 +1,8 @@
-from simplexlib.src.simplex import Simplex
+from simplexlib.src.simplex import Table
+
+from .tree import Node, Edge
 
 
-class BBMethod:
-    def __call__(self, A, b, c):
+class BranchAndBound:
+    def solve(table: Table) -> Node:
         pass
