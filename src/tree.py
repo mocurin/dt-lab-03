@@ -1,6 +1,6 @@
-import graphviz as gv
-
 from __future__ import annotations
+
+import graphviz as gv
 
 from dataclasses import dataclass
 from typing import Optional
@@ -11,8 +11,8 @@ class Edge:
     """Generic directed edge"""
 
     label: str
-    source: Node
-    target: Node
+    source: Node = None
+    target: Node = None
 
     def register(self, dot: gv.Digraph):
         """Register edge in graphviz.Digraph"""
@@ -26,8 +26,8 @@ class Node:
     """Generic graph node"""
 
     label: str
-    left: Optional[Edge]
-    right: Optional[Edge]
+    left: Optional[Edge] = None
+    right: Optional[Edge] = None
 
     def register(self, dot: gv.Digraph):
         """Register node in graphviz.Digraph"""
@@ -51,6 +51,6 @@ class Node:
     def name(self):
         """
         Generates unique Node-identifier
-        Because of the id() Nodes should never be reused in the same graph
+        !Usage of id() means that Nodes should never be reused in the same graph!
         """
         return str(id(self))
