@@ -1,52 +1,50 @@
 import numpy as np
 
-from simplexlib.src.simplex import Table, Simplex
+from simplexlib.src.table import Table, Simplex, V
 
 from .tree import Node, Edge
-from .utils import add_condition
 
 
 class BranchAndBound:
     @classmethod
-    def solve(cls, c: np.ndarray, A: np.ndarray, b: np.ndarray) -> Node:
-        table = Table.create(c, A, b)
+    def resolve(cls, table: Table, prev: np.float64 = None) -> Node:
+        summary = Simplex.resolve(table)
 
-        solved = Simplex.solve(table)
+        if not summary.fixed or not summary.solved:
+            return Node(summary, True)
 
-        if not solved:
-            return Node("No solution")
+        result: Table = summary.result
+        source: Table = summary.source
 
-        *x, F = table.table[:, 0]
+        if prev is not None and result.F == prev:
+            return Node(summary, True)
 
-        label = f"F = {F:.2f}, " + ", ".join(
-            f"{label} = {value:.2f}" for label, value in zip(table.v_labels, x)
-        )
+        node = Node(summary)
 
-        node = Node(label)
-
-        print(label)
-
-        for idx, value in enumerate(x):
+        for idx, (value, label) in enumerate(zip(result.b, result.vlabels)):
             if np.float64.is_integer(value):
                 continue
 
-            condition = np.zeros(table.table.shape[1] - 1)
+            condition = np.zeros(len(result.c))
             condition[idx] = 1
             left, right = np.floor(value), np.ceil(value)
-            lA, lb = add_condition((A, b), (condition, left))
-            rA, rb = add_condition((A, b), (condition, -right))
-            val_label = table.v_labels[idx]
+            ltable = source.add_constraint(
+                V[condition] <= left
+            )
+            rtable = source.add_constraint(
+                V[condition].inv >= right
+            )
 
             node.left = Edge(
-                f"{val_label}≤{left}",
+                [label, "≤", left],
                 node,
-                cls.solve(c, lA, lb),
+                cls.resolve(ltable, result.F),
             )
 
             node.right = Edge(
-                f"{val_label}≥{right}",
+                [label, "≥", right],
                 node,
-                cls.solve(c, rA, rb),
+                cls.resolve(rtable, result.F),
             )
 
             return node

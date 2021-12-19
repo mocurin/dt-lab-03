@@ -8,6 +8,7 @@ numpy = "*"
 jupyter = "*"
 pandas = "*"
 graphviz = "*"
+tabulate = "*"
 
 [dev-packages]
 flake8 = "*"
