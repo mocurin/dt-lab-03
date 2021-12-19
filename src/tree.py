@@ -21,10 +21,14 @@ class Edge:
 
         self.target.register(dot, formatter)
 
-    def label(self, formatter: Format):
+    def label(self, formatter: Format = None, pretty: bool = False):
+        formatter = formatter or Format(None)
+
         label, sign, value = self.data
 
-        return f"{formatter.default_var_sym}{label}{sign}{pretty_value(value, formatter.default_precision)}"
+        s = f"{formatter.default_var_sym}{'_' if pretty else ''}{label}{sign}{pretty_value(value, formatter.default_precision)}"
+
+        return f"${s}$" if pretty else s
 
 
 @dataclass
@@ -55,19 +59,24 @@ class Node:
 
         return dot
 
-    def label(self, formatter: Format):
+    def label(self, formatter: Format = None, pretty: bool = False):
+        formatter = formatter or Format(None)
+
         if self.invalid:
             return "No solution"
 
         base = ", ".join(
-            f"{formatter.default_var_sym}{label}={pretty_value(value, formatter.default_precision)}"
+            f"{formatter.default_var_sym}{'_' if pretty else ''}{label}={pretty_value(value, formatter.default_precision)}"
             for label, value in zip(
                 self.data.result.vlabels,
                 self.data.result.b
             )
         )
 
-        return f"{formatter.default_tgt_sym}={pretty_value(self.data.result.F, formatter.default_precision)}\\n{base}"
+        splitter = ', ' if pretty else '\\n'
+        s = f"{formatter.default_tgt_sym}={pretty_value(self.data.result.F, formatter.default_precision)}{splitter}{base}"
+
+        return f"${s}$" if pretty else s
 
     @property
     def name(self):
@@ -76,3 +85,18 @@ class Node:
         !Usage of id() means that Nodes should never be reused in the same graph!
         """
         return str(id(self))
+
+    @property
+    def leaves(self):
+        leaves = list()
+
+        if self.left:
+            leaves.extend(self.left.target.leaves)
+        
+        if self.right:
+            leaves.extend(self.right.target.leaves)
+
+        if not self.left and not self.right:
+            leaves.append(self)
+
+        return leaves
