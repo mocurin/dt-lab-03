@@ -12,7 +12,7 @@ class CuttingPlaneResult:
 
     @property
     def result(self):
-        return self.history and self.history[-1] 
+        return self.history and self.history[-1]
 
 
 def has_integer_solution(table: Table) -> bool:
@@ -40,8 +40,5 @@ class CuttingPlane:
 
             if has_integer_solution(summary.result):
                 return CuttingPlaneResult(history, True)
-            
-            table = summary.result.add_constraint(
-                cls._infer_constraint(summary.result)
-            )
-        
+
+            table = summary.result.add_constraint(cls._infer_constraint(summary.result))
